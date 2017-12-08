@@ -1,0 +1,99 @@
+---
+title: "Calculate your GPA"
+output: flexdashboard::flex_dashboard
+runtime: shiny
+---
+
+```{r global, include=FALSE}
+library(tidyverse)
+library(rhandsontable)
+
+init <- tribble(
+  ~class, ~grade, ~hours, ~major, ~include,
+  "FWIS 171", "A", 3L, TRUE, TRUE,
+  "LPAP 118", "A+", 1L, TRUE, TRUE,
+  "CHEM 401", "A", 3L, TRUE, TRUE,
+  "FWIS 171", "A", 3L, TRUE, TRUE,
+  "LPAP 118", "A+", 1L, FALSE, TRUE,
+  "CHEM 401", "A", 3L, FALSE, TRUE,
+  "FWIS 171", "A", 3L, FALSE, TRUE,
+  "LPAP 118", "A+", 1L, FALSE, TRUE,
+  "CHEM 401", "A", 3L, FALSE, TRUE,
+  "FWIS 171", "A", 3L, FALSE, TRUE,
+  "LPAP 118", "A+", 1L, FALSE, TRUE,
+  "MATH 221", "B", 3L, TRUE, TRUE
+)
+
+```
+
+Column
+-----------------------------------------------------------------------
+
+Based on the current information, your GPA is:
+
+- `r renderText({
+paste0("Overall: ", hours_to_gpa(hours_df(hot_to_r(input$courses))))
+})`
+
+- `r renderText({
+paste0("Major GPA: ", hours_to_gpa(hours_df(hot_to_r(input$courses), major = TRUE)))
+})`
+
+### Course Input
+
+The most appropriate way to get a GPA on a 4.0 scale is to treat A+ grades as As. If you don't have any A+s, then your GPA on a 4.0 scale is the same as on a 4.33 scale.
+
+```{r}
+checkboxInput("use_a_plus", label = "Treat A+ as 4.33 instead of 4?")
+```
+
+To add a new course, right click and select "Insert row above/below".
+
+```{r}
+letter_to_gpa <- function(letter) {
+  switch(letter,
+         "A+" = if (input$use_a_plus) 4.33 else 4,
+         "A" = 4,
+         "A-" = 3.67,
+         "B+" = 3.33,
+         "B" = 3,
+         "B-" = 2.67,
+         "C+" = 2.33,
+         "C" = 2,
+         "C-" = 1.67)
+}
+
+hours_df <- function(df, major = FALSE) {
+  df <- filter(df, grade != "S", grade != "P", include)
+  df <- if (major) filter(df, major) else df
+  mutate(df,
+         gpa_score = map_dbl(grade, letter_to_gpa),
+         gpa_pts = gpa_score * hours)
+}
+
+hours_to_gpa <- function(df) {
+  with(df, round(sum(gpa_pts) / sum(hours), 3))
+}
+
+rHandsontableOutput("courses")
+
+output$courses <- renderRHandsontable({
+  df <- if (is.null(input$courses)) init else hot_to_r(input$courses)
+  rhandsontable(df, rowHeaders = FALSE)
+})
+```
+
+
+Column
+-----------------------------------------------------------------------
+
+### GPA Hours for included courses
+
+```{r}
+renderTable({
+  hours_df(hot_to_r(input$courses))
+})
+```
+
+
+
