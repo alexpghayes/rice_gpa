@@ -4,7 +4,7 @@ For unknown reasons, Rice uses A+ grades. These are going away in the near futur
 
 This is a Shiny application that allows you to input your courses into a web interface and see your overall and major GPA, with the option of adjusting to a 4.0 scale.
 
-The application is available [here](http://shinyapps.io/alexpghayes/rice_gpa). It's hosted for free and may take a while to load initially.
+The application is available [here](http://alexpghayes.shinyapps.io/rice_gpa). It's hosted for free and may take a while to load initially.
 
 If have R and would like to run the application locally:
 
