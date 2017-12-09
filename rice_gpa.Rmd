@@ -8,26 +8,35 @@ runtime: shiny
 library(tidyverse)
 library(rhandsontable)
 
+# fix initialization errors
+
 init <- tribble(
   ~class, ~grade, ~hours, ~major, ~include,
   "FWIS 171", "A", 3L, TRUE, TRUE,
   "LPAP 118", "A+", 1L, TRUE, TRUE,
-  "CHEM 401", "A", 3L, TRUE, TRUE,
-  "FWIS 171", "A", 3L, TRUE, TRUE,
-  "LPAP 118", "A+", 1L, FALSE, TRUE,
-  "CHEM 401", "A", 3L, FALSE, TRUE,
-  "FWIS 171", "A", 3L, FALSE, TRUE,
-  "LPAP 118", "A+", 1L, FALSE, TRUE,
-  "CHEM 401", "A", 3L, FALSE, TRUE,
-  "FWIS 171", "A", 3L, FALSE, TRUE,
-  "LPAP 118", "A+", 1L, FALSE, TRUE,
-  "MATH 221", "B", 3L, TRUE, TRUE
+  "CHEM 401", "B", 3L, TRUE, TRUE,
+  "PHYS 345", "C-", 3L, TRUE, TRUE,
+  "HUMA 304", "A+", 1L, TRUE, TRUE,
+  "COMP 133", "F", 3L, TRUE, TRUE,
+  "ENGL 200", "A", 3L, TRUE, TRUE,
+  "SOCI 101", "A+", 1L, FALSE, TRUE,
+  "CAAM 560", "A", 3L, FALSE, TRUE,
+  "STAT 310", "A", 3L, FALSE, TRUE,
+  "STAT 405", "A+", 4L, FALSE, TRUE,
+  "MATH 221", "B", 3L, FALSE, TRUE
 )
-
 ```
 
-Column
+Column {.sidebar}
 -----------------------------------------------------------------------
+
+The most appropriate way to get a GPA on a 4.0 scale is to treat A+ grades as As. This is done by default. If you would like to see your GPA on the Rice scale, check the box below.
+
+```{r}
+checkboxInput("use_a_plus", label = "Treat A+ as 4.33 instead of 4?")
+```
+
+### Your GPA
 
 Based on the current information, your GPA is:
 
@@ -39,15 +48,12 @@ paste0("Overall: ", hours_to_gpa(hours_df(hot_to_r(input$courses))))
 paste0("Major GPA: ", hours_to_gpa(hours_df(hot_to_r(input$courses), major = TRUE)))
 })`
 
-### Course Input
+Column {data-width=400}
+-----------------------------------------------------------------------
 
-The most appropriate way to get a GPA on a 4.0 scale is to treat A+ grades as As. If you don't have any A+s, then your GPA on a 4.0 scale is the same as on a 4.33 scale.
+**Course Input**
 
-```{r}
-checkboxInput("use_a_plus", label = "Treat A+ as 4.33 instead of 4?")
-```
-
-To add a new course, right click and select "Insert row above/below".
+To add a new course, right click. Then select "Insert row above/below".
 
 ```{r}
 letter_to_gpa <- function(letter) {
@@ -60,7 +66,11 @@ letter_to_gpa <- function(letter) {
          "B-" = 2.67,
          "C+" = 2.33,
          "C" = 2,
-         "C-" = 1.67)
+         "C-" = 1.67,
+         "D+" = 1.33,
+         "D" = 1,
+         "D-" = 0.66,
+         "F" = 0)
 }
 
 hours_df <- function(df, major = FALSE) {
@@ -79,12 +89,12 @@ rHandsontableOutput("courses")
 
 output$courses <- renderRHandsontable({
   df <- if (is.null(input$courses)) init else hot_to_r(input$courses)
-  rhandsontable(df, rowHeaders = FALSE)
+  rhandsontable(df, rowHeaders = FALSE, stretchH = "all")
 })
 ```
 
 
-Column
+Column {data-width=600}
 -----------------------------------------------------------------------
 
 ### GPA Hours for included courses
