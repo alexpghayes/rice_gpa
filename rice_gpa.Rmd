@@ -53,7 +53,7 @@ Column {data-width=400}
 
 **Course Input**
 
-To add a new course, right click. Then select "Insert row above/below".
+Edit course information here by clicking the table and typing. To add a new course, right click, then select "Insert row above/below".
 
 ```{r}
 letter_to_gpa <- function(letter) {
